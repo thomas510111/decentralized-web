@@ -1,0 +1,2 @@
+##Decentralized web
+This is a project based on webtorrent and web2web.The goal is to make a framework for desigining websites that do not rely on webservers but inserted on peer2peer torrent.A web server is used just as a mirror.Bitcoin blockchain is used to track the torrent hash.You can update the content by making a new torrent and making a transaction from your bitcoin address with the hash of the new torrent as OP_RETURN.
