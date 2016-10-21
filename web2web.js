@@ -27,7 +27,15 @@
 		}
 
 		var getTorrentHash = function(btcAddress){
-			$.get('https://blockexplorer.com/api/txs/?address=' + btcAddress).then(function(data) {
+				var data;
+				jQuery.ajax({
+					url: 'https://blockexplorer.com/api/txs/?address=' + btcAddress,
+					success: function(dataa) {
+						data = dataa;
+					},
+					async:false
+				});
+
 			for (var i = 0; i < data.txs.length; i++) {
 				if (data.txs[i].vin.length > 0 && data.txs[i].vin[0].addr === btcAddress) {
 					for (var j = 0; j < data.txs[i].vout.length; j++) {
@@ -39,8 +47,6 @@
 					}
 				}
 			}
-
-			})
 
 		}
 		var findTorrent = function(ttorrent,pathh){
