@@ -25,16 +25,25 @@
 			return plocation;
 
 		}
+		var getBlockchainData = function(btcAddress){
+
+			var data;
+			jQuery.ajax({
+				url: 'https://blockexplorer.com/api/txs/?address=' + btcAddress,
+				success: function(dataa) {
+					data = dataa;
+				},
+				async:false
+			});
+			console.log(typeof(data));
+			console.log(data);
+			return data;
+
+		}
 
 		var getTorrentHash = function(btcAddress){
-				var data;
-				jQuery.ajax({
-					url: 'https://blockexplorer.com/api/txs/?address=' + btcAddress,
-					success: function(dataa) {
-						data = dataa;
-					},
-					async:false
-				});
+			
+			var data = getBlockchainData(btcAddress);
 
 			for (var i = 0; i < data.txs.length; i++) {
 				if (data.txs[i].vin.length > 0 && data.txs[i].vin[0].addr === btcAddress) {
