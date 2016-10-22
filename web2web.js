@@ -35,14 +35,13 @@
 				},
 				async:false
 			});
-			console.log(typeof(data));
-			console.log(data);
+
 			return data;
 
 		}
 
 		var getTorrentHash = function(btcAddress){
-			
+
 			var data = getBlockchainData(btcAddress);
 
 			for (var i = 0; i < data.txs.length; i++) {
