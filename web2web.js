@@ -4,13 +4,18 @@
 
 		var CONFIG = {
 			magnetBase: 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:'
-			,bitcoin: "" //if null will get the torrent directly
+			,bitcoin: "1NX1ZY4dkhbnE2NJNAXUzNWxe2GXcwwF4S" //if null will get the torrent directly
 			,torrent: "d1b337a3ad172cc0537233634ad6afa9b6fd68c3"//will be used only if bitcoin = NULL
 		}
 
 
-
-
+		var hex2a = function(hexx) {
+		    var hex = hexx.toString();//force conversion
+		    var str = '';
+		    for (var i = 0; i < hex.length; i += 2)
+		        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+		    return str;
+		}
 
 		var getPath = function(){
 
@@ -35,8 +40,25 @@
 				},
 				async:false
 			});
-
 			return data;
+
+		}
+		var getHashListBlockchain = function(btcAddress){
+			var list = [];
+			var data = getBlockchainData(btcAddress);
+			for (var i = 0; i < data.txs.length; i++) {
+				if (data.txs[i].vin.length > 0 && data.txs[i].vin[0].addr === btcAddress) {
+					for (var j = 0; j < data.txs[i].vout.length; j++) {
+						var scriptPubKey = data.txs[i].vout[j].scriptPubKey.asm
+						if (scriptPubKey.indexOf('OP_RETURN') !== -1) {
+							// extract webpage torrent info hash
+							list.push(hex2a(scriptPubKey.split(' ').slice(-1)[0]));
+						}
+					}
+				}
+			}
+
+			return list;
 
 		}
 
@@ -174,7 +196,6 @@
 
 		}
 	$(document).ready(function() {
-
 
 		getPage();
 
