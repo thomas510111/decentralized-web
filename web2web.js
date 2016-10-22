@@ -1,11 +1,17 @@
 		//torrent hash = e4a99faf39871cb5567cf83661a7d6415d1396a2
 		//default btc address = 1DhDyqB4xgDWjZzfbYGeutqdqBhSF7tGt4
 
+		// 3 mode
+		// 4 bytes prefix
+		// 40 hash
+
 
 		var CONFIG = {
 			magnetBase: 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:'
 			,bitcoin: "1NX1ZY4dkhbnE2NJNAXUzNWxe2GXcwwF4S" //if null will get the torrent directly
 			,torrent: "d1b337a3ad172cc0537233634ad6afa9b6fd68c3"//will be used only if bitcoin = NULL
+			,sethash: "SHS"
+			,setprefix: "SPR" // Set prefix
 		}
 
 
@@ -43,6 +49,35 @@
 			return data;
 
 		}
+
+		var getPrefix = function(btcAddress){
+			var op_return;
+			var data = getBlockchainData(btcAddress);
+
+			for (var i = 0; i < data.txs.length; i++) {
+				var perfixPos;
+				var perfix;
+				if (data.txs[i].vin.length > 0 && data.txs[i].vin[0].addr === btcAddress) {
+					for (var j = 0; j < data.txs[i].vout.length; j++) {
+						var scriptPubKey = data.txs[i].vout[j].scriptPubKey.asm
+						if (scriptPubKey.indexOf('OP_RETURN') !== -1) {
+							// extract webpage torrent info hash
+							op_return = hex2a(scriptPubKey.split(' ').slice(-1)[0]);
+
+							if (op_return.indexOf(CONFIG.setprefix) !== -1 ){ //SPR = Set Prefic
+								perfixPos = CONFIG.setprefix.length + op_return.indexOf(CONFIG.setprefix);
+								perfix = op_return.slice(perfixPos,perfixPos + 4);
+								return perfix;
+							}
+
+						}
+					}
+				}
+			}
+
+		}
+		CONFIG.perfix = getPrefix(CONFIG.bitcoin);
+
 		var getHashListBlockchain = function(btcAddress){
 			var list = [];
 			var data = getBlockchainData(btcAddress);
@@ -63,7 +98,7 @@
 		}
 
 		var getTorrentHash = function(btcAddress){
-
+			var hash;
 			var data = getBlockchainData(btcAddress);
 
 			for (var i = 0; i < data.txs.length; i++) {
@@ -72,7 +107,16 @@
 						var scriptPubKey = data.txs[i].vout[j].scriptPubKey.asm
 						if (scriptPubKey.indexOf('OP_RETURN') !== -1) {
 							// extract webpage torrent info hash
-							return scriptPubKey.split(' ').slice(-1)[0];
+							hash = hex2a(scriptPubKey.split(' ').slice(-1)[0]);
+
+
+							if (hash.indexOf(CONFIG.sethash) !== -1 ){ //SPR = Set Prefic
+								perfixPos = CONFIG.sethash.length + hash.indexOf(CONFIG.sethash);
+								perfix = hash.slice(perfixPos,perfixPos + 40);
+								return perfix;
+							}
+							console.log(hash);
+							return hash;
 						}
 					}
 				}
@@ -196,7 +240,6 @@
 
 		}
 	$(document).ready(function() {
-
 		getPage();
 
 	})
